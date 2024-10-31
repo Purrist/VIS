@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片滚动亮起效果</title>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family:cursive;
+        }
+
+        .image-container {
+            display: flex;
+            width: 85%;
+            justify-content: space-around;
+            position: absolute;
+            top: 35%;
+            height: 35%;
+        }
+
+        .image {
+            width: 25%;
+            opacity: 0.2;
+            transition: opacity 0.5s;
+        }
+
+        .scroll-container {
+            width: 58%;
+            height: 10px;
+            background-color: #333;
+            position: absolute;
+            top: 80%;
+            display: flex;
+            margin: 21px 0;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background-color: orange;
+            border-radius: 50%;
+            transition: left 0.3s ease-out; /* 使用 ease-out 实现更自然的移动 */
+        }
+
+        /* 流星效果的伪元素 */
+        .scroll-indicator::after {
+            content: '';
+            position: absolute;
+            left: -60px; /* 拖尾的长度增加 */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 8px;
+            background: linear-gradient(to right, rgba(255, 165, 0, 0.6), rgba(255, 165, 0, 0)); /* 渐变增强 */
+            border-radius: 4px;
+            transition: width 0.3s ease-out, opacity 0.3s ease-out; /* 平滑过渡 */
+            opacity: 0.8;
+        }
+
+
+        .time-label {
+            position: absolute;
+            top: -30px;
+            color: orange;
+            font-size: 14px;
+            font-weight: bold;
+            transform: translateX(-50%);
+        
+        }
+
+        .text-container {
+            position: absolute;
+            top: 15%;
+            width: 71%;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            font-size: 18px;
+            line-height: 2;
+        }
+
+        .text-container.active {
+            opacity: 1;
+        }
+
+        .highlight {
+        color: orange;
+        line-height: 2;
+        font-size: 18px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="text-container" id="text1"><p>2020年3月30日15时，四川凉山州西昌市因电力故障突发森林火灾。此次森林火灾在救援过程中因火场风向突变、风力陡增、飞火断路、自救失效，<span class="highlight">致使参与火灾扑救的19人牺牲、3人受伤</span>。综合计算受害森林面积791.6公顷，直接经济损失9731.12万元</p></div>
+    <div class="text-container" id="text2"><p>2021年4月20日四川省凉山州冕宁县发生森林火灾，原因是<span class="highlight">有人在山上随意丢弃烟头。</span>自接到火情后，四川州县联指及时组织救援力量，充分利用新建的防火通道、隔离带和配置的装备设施等条件，第一时间赶赴火场进行扑救，有效阻止了火势大面积蔓延。</p></div>
+    <div class="text-container" id="text3"><p>2024年3月15日，四川省甘孜州雅江县突发森林火灾，起火原因为<span class="highlight">施工动火作业，</span>突遇极端大风造成扩散。截至3月22日雅江火场投入扑火力量3187人，国家向四川省调拨了1500顶棉帐篷、6000张折叠床、6000床棉被、6000条褥子等物资用于救灾</p></div>
+
+    <div class="scroll-container">
+        <div class="time-label" id="timeLabel">5:38 p.m.</div>
+        <div class="scroll-indicator" id="scrollIndicator"></div>
+    </div>
+
+    <div class="image-container">
+        <img src="image1.jfif" class="image" id="image1" alt="Image 1">
+        <img src="image2.jfif" class="image" id="image2" alt="Image 2">
+        <img src="image3.jpg" class="image" id="image3" alt="Image 3">
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const images = document.querySelectorAll('.image');
+        const texts = document.querySelectorAll('.text-container');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+        const timeLabel = document.getElementById('timeLabel');
+
+        // 示例时间数据，可替换为动态数据
+        const times = ["2020.3.30", "2021.4.20", "2024.3.15"];
+
+        function showImage(index) {
+            images.forEach((img, i) => {
+                img.style.opacity = i <= index ? '1' : '0.2';
+            });
+            texts.forEach((text, i) => {
+                text.classList.remove('active');
+                if (i === index) {
+                    text.classList.add('active');
+                }
+            });
+
+            // 更新滑块位置
+            const indicatorPosition = (index / (images.length - 1)) * 100;
+            scrollIndicator.style.left = `${indicatorPosition}%`;
+
+            // 更新时间标签位置，使其与滑块水平居中对齐
+            timeLabel.style.left = `${indicatorPosition}%`;
+            timeLabel.textContent = times[index];
+        }
+
+        showImage(currentIndex);
+
+        window.addEventListener('wheel', (event) => {
+            if (event.deltaY > 0) {
+                if (currentIndex < images.length - 1) {
+                    currentIndex++;
+                }
+            } else {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                }
+            }
+            showImage(currentIndex);
+        });
+
+    </script>
+</body>
+</html>
